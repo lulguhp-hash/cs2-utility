@@ -22,7 +22,85 @@
 
  const mediaFor=x=>window.GRANDE_MEDIA?.[x.id]||{};
  const safeMedia=v=>typeof v==='string'&&/^(?:media\/[a-zA-Z0-9_./-]+|https:\/\/[^\s]+)$/.test(v)?esc(v):'';
- function mediaCard(x){const m=mediaFor(x);return `<details class="grande-media" style="margin:14px 0;border:1px solid #34434f;border-radius:12px;padding:12px"><summary style="cursor:pointer;color:#ff8b32;font-weight:bold">Фото и видеоинструкция</summary>${[['start','1. Начальная позиция'],['aim','2. Точка прицеливания'],['result','3. Результат броска']].map(([k,label])=>`<div style="margin-top:12px"><b>${label}</b>${safeMedia(m[k])?`<img loading="lazy" src="${safeMedia(m[k])}" alt="${label}" style="width:100%;border-radius:8px;margin-top:8px">`:'<p style="font-size:13px">Фото пока не добавлено</p>'}</div>`).join('')}<div style="margin-top:12px"><b>Видео</b>${safeMedia(m.video)?`<video controls playsinline preload="none" src="${safeMedia(m.video)}" style="width:100%;margin-top:8px"></video>`:'<p style="font-size:13px">Видео пока не добавлено</p>'}</div>${x.documented&&x.source?`<a href="${esc(x.source)}" target="_blank" rel="noopener noreferrer" style="color:#ff8b32">Смотреть оригинальный гайд ↗</a>`:''}</details>`;}
+ function mediaCard(x) {
+  const m = mediaFor(x);
+  const video = safeMedia(m.video);
+
+  const photos = [
+    ['start', '1. Начальная позиция'],
+    ['aim', '2. Точка прицеливания'],
+    ['result', '3. Результат броска']
+  ].filter(([k]) => safeMedia(m[k]));
+
+  if (!video && !photos.length) return '';
+
+  return `
+    <details class="grande-media"
+      style="margin:14px 0;border:1px solid #34434f;
+      border-radius:14px;padding:12px">
+
+      <summary style="cursor:pointer;
+        color:#ff8b32;font-weight:bold">
+        ▶ Видео и фотоинструкция
+      </summary>
+
+      ${video ? `
+        <div style="margin-top:14px">
+          <video controls playsinline
+            preload="none"
+            src="${video}"
+            onerror="this.nextElementSibling.hidden=false"
+            style="display:block;width:100%;
+            border-radius:10px;background:#10151b">
+          </video>
+
+          <p hidden style="color:#ffb579">
+            Видео недоступно. Открой оригинальный гайд.
+          </p>
+
+          <button type="button" class="chip"
+            style="margin-top:10px;padding:10px;
+            width:100%;cursor:pointer"
+            onclick="
+              const v=this.parentElement.querySelector('video');
+              if(v.webkitEnterFullscreen){
+                v.webkitEnterFullscreen();
+              }else if(v.requestFullscreen){
+                v.requestFullscreen().catch(()=>{});
+              }
+            ">
+            ⛶ На весь экран
+          </button>
+
+          <p style="font-size:12px;color:#91a0ae">
+            Источник: CS2Util
+          </p>
+        </div>
+      ` : ''}
+
+      ${photos.map(([k,label]) => `
+        <div style="margin-top:14px">
+          <b>${label}</b>
+          <img loading="lazy"
+            src="${safeMedia(m[k])}"
+            alt="${label}"
+            style="width:100%;border-radius:10px;
+            margin-top:8px">
+        </div>
+      `).join('')}
+
+      ${x.documented && x.source ? `
+        <a href="${esc(x.source)}"
+          target="_blank"
+          rel="noopener noreferrer"
+          style="display:block;color:#ff8b32;
+          margin-top:12px">
+          Смотреть оригинальный гайд ↗
+        </a>
+      ` : ''}
+    </details>
+  `;
+}
  function render(){drawRadar();const q=$('lineupSearch').value.toLowerCase(),p=$('positionSelect').value;const xs=lineups.filter(x=>x.map===s.selected&&matches(x)&&(p==='all'||x.position===p)&&`${x.name} ${x.notes}`.toLowerCase().includes(q));$('count').textContent=xs.length+' позиций';$('lineupList').innerHTML=xs.map(x=>`<article class="lineup-card"><h3>${esc(x.name)} <button class="icon-btn" data-fav="${esc(x.id)}" aria-label="Избранное" aria-pressed="${fav.has(x.id)}">${fav.has(x.id)?'★':'☆'}</button></h3><div class="chips"><span class="chip">${esc(names[x.type])}</span><span class="chip">${esc(x.side)}</span><span class="chip">${esc(x.position)}</span></div><p>${esc(x.notes)}</p>${x.documented?`<p style="color:#ffb579">Есть внешний гайд · не проверено нами в игре</p><p><b>Откуда:</b> ${esc(x.start)}</p><p><b>Бросок:</b> ${esc(x.throw)}</p><details><summary style="color:#ff8b32;cursor:pointer">Команда для локальной тренировки (sv_cheats 1)</summary><code style="display:block;overflow-wrap:anywhere;user-select:all;margin:12px 0">${esc(x.command)}</code><button class="icon-btn" style="width:auto;padding:8px;font-size:14px" data-copy="${esc(x.id)}">Копировать</button></details>`:'<p>Точка броска не проверена</p>'}${x.source?`<a style="color:#ff8b32" href="${esc(x.source)}" target="_blank" rel="noopener noreferrer">${x.documented?"Открыть инструкцию CS2Util ↗":"Открыть каталог ↗"}</a>`:""}${mediaCard(x)}</article>`).join('')||'<div class="empty">Нет позиций по выбранным фильтрам.</div>';$('lineupList').querySelectorAll('[data-copy]').forEach(b=>b.onclick=async()=>{try{await navigator.clipboard.writeText(lineups.find(x=>x.id===b.dataset.copy).command);b.textContent='Скопировано';}catch(e){b.textContent='Выдели команду вручную';}});$('lineupList').querySelectorAll('[data-fav]').forEach(b=>b.onclick=()=>{const id=b.dataset.fav;fav.has(id)?fav.delete(id):fav.add(id);save();render();});}
  $('backToMaps').onclick=()=>{s.selected=null;radar.hidden=true;$('lineupsSection').hidden=true;$('mapGrid').hidden=false;$('mapGrid').style.removeProperty('display');$('lineupsSection').style.display='none';$('search').parentElement.hidden=false;$('listTitle').textContent='Популярные карты';maps();};
  $('search').oninput=maps;$('mapSelect').onchange=e=>{s.map=e.target.value;if(s.selected&&s.map!=='all')open(s.map);else if(s.selected)$('backToMaps').click();else maps();};
