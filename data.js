@@ -380,3 +380,58 @@ const lineups = [
     "verified": false
   }
 ];
+[
+  [
+    "xbox-long", "T", "Long",
+    "ЛКМ в прыжке",
+    "xbox-smoke-from-long",
+    "824.274841 808.032593 110.871246",
+    "0.640108 159.957138 0.000000"
+  ],
+  [
+    "xbox-right-mid", "T", "Right Mid",
+    "ЛКМ стоя",
+    "xbox-smoke-from-right-side-mid",
+    "-621.944885 536.474792 72.245239",
+    "-12.452237 51.989853 0.000000"
+  ],
+  [
+    "xbox-ct-mid", "CT", "CT Mid",
+    "ЛКМ стоя",
+    "mid-xbox-smoke-from-ct-mid",
+    "-337.030701 2423.886475 -27.578003",
+    "-21.000351 -101.632050 0.000000"
+  ],
+  [
+    "xbox-barrels", "T", "Mid Barrels",
+    "Два шага бегом + ЛКМ",
+    "xbox-smoke-from-mid-barrels",
+    "29.621044 308.031616 63.484333",
+    "-14.151875 127.986572 0.000000"
+  ],
+  [
+    "xbox-spawn3", "T", "Spawn 3",
+    "ЛКМ в прыжке",
+    "spawn3-TO-XBOX",
+    "-428.000000 -843.000000 156.245865",
+    "-12.552456 86.206802 0.000000"
+  ]
+].forEach(([id,side,start,method,slug,pos,ang]) => {
+  if (lineups.some(x => x.id === "d2-" + id)) return;
+
+  lineups.push({
+    id: "d2-" + id,
+    map: "dust2",
+    type: "smoke",
+    side: side,
+    position: "Xbox",
+    name: "Xbox — " + start,
+    notes: "Точный прицел смотри в оригинальном гайде.",
+    source: "https://www.cs2util.com/ru/dust2/smoke/" + slug,
+    verified: false,
+    start: start,
+    throw: method,
+    command: "setpos " + pos + ";setang " + ang,
+    documented: true
+  });
+});
