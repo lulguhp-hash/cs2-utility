@@ -1,2 +1,5 @@
-window.GRANDE_MEDIA = {};
-// Example: "d2-1": {start:"media/xbox-start.jpg", aim:"media/xbox-aim.jpg", result:"media/xbox-result.jpg", video:"media/xbox.mp4"}
+window.GRANDE_MEDIA = {
+  "d2-1": {
+    video: "https://assets.cs2util.com/dust2/smoke/xbox/xbox-smoke-from-nomal-t-spawn.webm"
+  }
+};
