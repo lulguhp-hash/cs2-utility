@@ -62,9 +62,13 @@ const lineups = [
     "side": "T",
     "position": "Xbox",
     "name": "Xbox",
-    "notes": "Тактическая цель для будущей раскидки. Техника броска требует проверки в игре.",
-    "source": "https://www.cs2util.com/ru/dust2/smoke",
-    "verified": false
+    "notes": "Встань в угол, наведи прицел на сколотый край стены.",
+    "source": "https://www.cs2util.com/ru/dust2/smoke/xbox-smoke-from-nomal-t-spawn",
+    "verified": false,
+    "start": "T Spawn",
+    "throw": "ЛКМ в прыжке",
+    "command": "setpos -299.968933 -1163.764160 136.982574;setang -12.228539 90.173004 0.000000",
+    "documented": true
   },
   {
     "id": "d2-2",
@@ -73,9 +77,13 @@ const lineups = [
     "side": "T",
     "position": "CT Spawn",
     "name": "CT Spawn",
-    "notes": "Тактическая цель для будущей раскидки. Техника броска требует проверки в игре.",
-    "source": "https://www.cs2util.com/ru/dust2/smoke",
-    "verified": false
+    "notes": "Оставайся неподвижным; точный прицел смотри в гайде.",
+    "source": "https://www.cs2util.com/ru/dust2/smoke/ct-spawn-smoke-for-cross-from-short",
+    "verified": false,
+    "start": "Short",
+    "throw": "ЛКМ стоя",
+    "command": "setpos 195.438156 1339.492188 63.767769;setang -15.735346 66.281380 0.000000",
+    "documented": true
   },
   {
     "id": "d2-3",
@@ -106,9 +114,13 @@ const lineups = [
     "side": "T",
     "position": "B Doors",
     "name": "B Doors",
-    "notes": "Тактическая цель для будущей раскидки. Техника броска требует проверки в игре.",
-    "source": "https://www.cs2util.com/ru/dust2/smoke",
-    "verified": false
+    "notes": "Встань у середины колонны, наведи прицел в просвет крыши.",
+    "source": "https://www.cs2util.com/ru/dust2/smoke/b-doors-smoke-from-upper-tunnels",
+    "verified": false,
+    "start": "Верхняя темка",
+    "throw": "ЛКМ стоя",
+    "command": "setpos -1783.082520 1034.343994 101.382843;setang -57.756500 68.491074 0.000000",
+    "documented": true
   },
   {
     "id": "d2-6",
@@ -117,9 +129,13 @@ const lineups = [
     "side": "T",
     "position": "B Window",
     "name": "B Window",
-    "notes": "Тактическая цель для будущей раскидки. Техника броска требует проверки в игре.",
-    "source": "https://www.cs2util.com/ru/dust2/smoke",
-    "verified": false
+    "notes": "Не двигайся перед броском; точный прицел смотри в гайде.",
+    "source": "https://www.cs2util.com/ru/dust2/smoke/window-smoke-from-upper-tunnels2",
+    "verified": false,
+    "start": "Верхняя темка",
+    "throw": "ЛКМ в прыжке",
+    "command": "setpos -1729.437012 1064.032349 95.586044;setang -62.608059 74.675156 0.000000",
+    "documented": true
   },
   {
     "id": "d2-7",
