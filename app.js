@@ -1,37 +1,18 @@
 (() => {
- const tg = window.Telegram?.WebApp;
- if (tg) { tg.ready(); tg.expand(); try { tg.setHeaderColor("#10151b"); tg.setBackgroundColor("#10151b"); } catch(e) {} }
- const $ = id => document.getElementById(id);
- const state = {type:"all",side:"all",map:"all",favorites:false,selected:null};
- const favorites = new Set(JSON.parse(localStorage.getItem("cs2-favorites") || "[]"));
- const typeNames = {smoke:"СМОК",flash:"ФЛЕШКА",molotov:"МОЛОТОВ",he:"HE"};
- MAPS.forEach(m => $("mapSelect").add(new Option(m.name,m.id)));
- function saveFav(){localStorage.setItem("cs2-favorites",JSON.stringify([...favorites]));}
- function renderMaps(){
-   const q=$("search").value.trim().toLowerCase();
-   const filtered=MAPS.filter(m=>(state.map==="all"||m.id===state.map)&&(!q||m.name.toLowerCase().includes(q)||m.desc.toLowerCase().includes(q))&&(!state.favorites||favorites.has(m.id)));
-   $("mapGrid").innerHTML=filtered.map(m=>`<button class="map-card" data-map="${m.id}"><span class="map-code">${m.code}</span><strong>${m.name}</strong><small>${lineups.filter(x=>x.map===m.id).length} раскидок в базе</small></button>`).join("") || `<div class="empty">Ничего не найдено. Попробуй изменить поиск или фильтр.</div>`;
-   $("count").textContent=`${filtered.length} карт`;
-   $("mapGrid").querySelectorAll("[data-map]").forEach(b=>b.addEventListener("click",()=>openMap(b.dataset.map)));
- }
- function openMap(id){
-   state.selected=id; const m=MAPS.find(x=>x.id===id);
-   $("lineupsSection").hidden=false;$("mapGrid").hidden=true;$("filters").hidden=true;$("tabs").hidden=true;$("search").parentElement.hidden=true;
-   $("listTitle").textContent="Раскидки";$("detailMapName").textContent=m.name;$("detailMapDesc").textContent=m.desc;
-   const positions=[...new Set(lineups.filter(x=>x.map===id).map(x=>x.position))];
-   $("positionSelect").innerHTML='<option value="all">Все позиции</option>'+positions.map(p=>`<option>${p}</option>`).join("");
-   renderLineups();
- }
- function renderLineups(){
-   const q=$("lineupSearch").value.toLowerCase(),pos=$("positionSelect").value;
-   const items=lineups.filter(x=>x.map===state.selected&&(state.type==="all"||x.type===state.type)&&(state.side==="all"||x.side===state.side)&&(pos==="all"||x.position===pos)&&(!q||`${x.name} ${x.position} ${x.notes||""}`.toLowerCase().includes(q)));
-   $("lineupList").innerHTML=items.length?items.map(x=>`<article class="lineup-card"><h3>${x.name}</h3><div class="chips"><span class="chip">${typeNames[x.type]||x.type}</span><span class="chip">${x.side}</span><span class="chip">${x.position}</span></div><p>${x.notes||"Инструкция будет добавлена после проверки раскидки."}</p></article>`).join(""):`<div class="empty"><b>База раскидок пока не заполнена.</b><br>Каталог карт уже работает. Следующий этап — добавить проверенные точки броска, прицелы, пошаговые инструкции и видео. Непроверенные позиции не показываем как готовые раскидки.</div>`;
- }
- $("backToMaps").addEventListener("click",()=>{state.selected=null;$("lineupsSection").hidden=true;$("mapGrid").hidden=false;$("filters").hidden=false;$("tabs").hidden=false;$("search").parentElement.hidden=false;$("listTitle").textContent="Популярные карты";renderMaps();});
- $("search").addEventListener("input",renderMaps);$("mapSelect").addEventListener("change",e=>{state.map=e.target.value;renderMaps();});
- document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");state.type=b.dataset.type;if(state.selected)renderLineups();}));
- document.querySelectorAll(".side").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".side").forEach(x=>x.classList.remove("active"));b.classList.add("active");state.side=b.dataset.side;if(state.selected)renderLineups();}));
- $("lineupSearch").addEventListener("input",renderLineups);$("positionSelect").addEventListener("change",renderLineups);
- $("favToggle").addEventListener("click",()=>{state.favorites=!state.favorites;$("favToggle").textContent=state.favorites?"★":"☆";renderMaps();});
- renderMaps();
+ const tg=window.Telegram?.WebApp; try {tg?.ready();tg?.expand();tg?.setHeaderColor('#10151b');tg?.setBackgroundColor('#10151b');}catch(e){}
+ const $=id=>document.getElementById(id), tabs=document.querySelector('.tabs'), filters=document.querySelector('.filters');
+ const s={map:'all',type:'all',side:'all',selected:null,fav:false};
+ let fav=new Set();try{fav=new Set(JSON.parse(localStorage.getItem('cs2-lineup-favorites')||'[]'));}catch(e){}
+ const save=()=>{try{localStorage.setItem('cs2-lineup-favorites',JSON.stringify([...fav]));}catch(e){}};
+ const names={smoke:'Смок',flash:'Флешка',molotov:'Молотов',he:'HE'};
+ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const matches=x=>(s.type==='all'||x.type===s.type)&&(s.side==='all'||x.side===s.side)&&(!s.fav||fav.has(x.id));
+ MAPS.forEach(m=>$('mapSelect').add(new Option(m.name,m.id)));
+ function maps(){const q=$('search').value.trim().toLowerCase();const ms=MAPS.filter(m=>(s.map==='all'||s.map===m.id)&&(!s.fav||lineups.some(x=>x.map===m.id&&fav.has(x.id)))&&(!q||`${m.name} ${m.desc}`.toLowerCase().includes(q)||lineups.some(x=>x.map===m.id&&x.name.toLowerCase().includes(q))));$('count').textContent=ms.length+' карт';$('mapGrid').innerHTML=ms.map(m=>`<button class="map-card" data-map="${esc(m.id)}"><span class="map-code">${esc(m.code)}</span><strong>${esc(m.name)}</strong><small>${lineups.filter(x=>x.map===m.id&&matches(x)).length} позиций в каталоге</small></button>`).join('')||'<div class="empty">Ничего не найдено</div>';$('mapGrid').querySelectorAll('[data-map]').forEach(b=>b.onclick=()=>open(b.dataset.map));}
+ function open(id){s.selected=id;const m=MAPS.find(x=>x.id===id);$('mapGrid').hidden=true;$('lineupsSection').hidden=false;$('search').parentElement.hidden=true;$('detailMapName').textContent=m.name;$('detailMapDesc').textContent=m.desc;$('listTitle').textContent='Раскидки';$('lineupSearch').value='';$('positionSelect').replaceChildren(new Option('Все позиции','all'),...[...new Set(lineups.filter(x=>x.map===id).map(x=>x.position))].map(p=>new Option(p,p)));render();$('lineupsSection').scrollIntoView({block:'start'});}
+ function render(){const q=$('lineupSearch').value.toLowerCase(),p=$('positionSelect').value;const xs=lineups.filter(x=>x.map===s.selected&&matches(x)&&(p==='all'||x.position===p)&&`${x.name} ${x.notes}`.toLowerCase().includes(q));$('count').textContent=xs.length+' позиций';$('lineupList').innerHTML=xs.map(x=>`<article class="lineup-card"><h3>${esc(x.name)} <button class="icon-btn" data-fav="${esc(x.id)}" aria-label="Избранное" aria-pressed="${fav.has(x.id)}">${fav.has(x.id)?'★':'☆'}</button></h3><div class="chips"><span class="chip">${esc(names[x.type])}</span><span class="chip">${esc(x.side)}</span><span class="chip">${esc(x.position)}</span></div><p>${esc(x.notes)}</p><p>Точка броска не проверена</p>${x.source?`<a style="color:#ff8b32" href="${esc(x.source)}" target="_blank" rel="noopener noreferrer">Открыть каталог смоков ↗</a>`:""}</article>`).join('')||'<div class="empty">Нет позиций по выбранным фильтрам.</div>';$('lineupList').querySelectorAll('[data-fav]').forEach(b=>b.onclick=()=>{const id=b.dataset.fav;fav.has(id)?fav.delete(id):fav.add(id);save();render();});}
+ $('backToMaps').onclick=()=>{s.selected=null;$('lineupsSection').hidden=true;$('mapGrid').hidden=false;$('search').parentElement.hidden=false;$('listTitle').textContent='Популярные карты';maps();};
+ $('search').oninput=maps;$('mapSelect').onchange=e=>{s.map=e.target.value;if(s.selected&&s.map!=='all')open(s.map);else if(s.selected)$('backToMaps').click();else maps();};
+ for(const [cls,key] of [['tab','type'],['side','side']])document.querySelectorAll('.'+cls).forEach(b=>b.onclick=()=>{document.querySelectorAll('.'+cls).forEach(x=>x.classList.toggle('active',x===b));s[key]=b.dataset[key];s.selected?render():maps();});
+ $('lineupSearch').oninput=render;$('positionSelect').onchange=render;$('favToggle').onclick=()=>{s.fav=!s.fav;$('favToggle').textContent=s.fav?'★':'☆';s.selected?render():maps();};maps();
 })();
